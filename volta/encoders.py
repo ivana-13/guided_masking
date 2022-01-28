@@ -164,31 +164,6 @@ class BertGatedSelfAttention(nn.Module):
     def __init__(self, config, layer_num):
         super(BertGatedSelfAttention, self).__init__()
 
-        hidden_size = config.sublayer2attn_hidden_size.get(str(layer_num), config.hidden_size)
-        num_attention_heads = config.sublayer2num_attention_heads.get(str(layer_num), config.num_attention_heads)
-        v_hidden_size = config.sublayer2v_attn_hidden_size.get(str(layer_num), config.v_hidden_size)
-        v_num_attention_heads = config.sublayer2v_num_attention_heads.get(str(layer_num), config.v_num_attention_heads)
-
-        if hidden_size % num_attention_heads != 0:
-            raise ValueError(
-                "The text hidden size (%d) is not a multiple of the number of attention "
-                "heads (%d)" % (hidden_size, num_attention_heads)
-            )
-        self.num_attention_heads = num_attention_heads
-        self.attention_head_size = int(hidden_size / num_attention_heads)
-        self.all_head_size = self.num_attention_heads * self.attention_head_size
-
-        if v_hidden_size % v_num_attention_heads != 0:
-            raise ValueError(
-                "The vision hidden size (%d) is not a multiple of the number of attention "
-                "heads (%d)" % (v_hidden_size, num_attention_heads)
-            )
-        self.v_num_attention_heads = v_num_attention_heads
-        self.v_attention_head_size = int(v_hidden_size / v_num_attention_heads)
-        self.v_all_head_size = self.v_num_attention_heads * self.v_attention_head_size
-
-        self.visualization = config.visualization
-
         self.has_tt = (layer_num in config.tt_attn_sublayers)
         self.has_tv = (layer_num in config.tv_attn_sublayers)
         self.has_vt = (layer_num in config.vt_attn_sublayers)
@@ -198,17 +173,45 @@ class BertGatedSelfAttention(nn.Module):
         self.share_layer = (layer_num in config.shared_sublayers)
         if self.has_tv or self.has_vt:
             hidden_size = config.sublayer2attn_hidden_size.get(str(layer_num), config.v_hidden_size)
-            num_attention_heads = config.sublayer2num_attention_heads.get(str(layer_num), config.num_attention_heads)
+            num_attention_heads = config.sublayer2num_attention_heads.get(str(layer_num), config.v_num_attention_heads)
             v_hidden_size = config.sublayer2v_attn_hidden_size.get(str(layer_num), config.v_hidden_size)
-            v_num_attention_heads = config.sublayer2v_num_attention_heads.get(str(layer_num), config.num_attention_heads)
+            v_num_attention_heads = config.sublayer2v_num_attention_heads.get(str(layer_num), config.v_num_attention_heads)    
+
             self.num_attention_heads = num_attention_heads
             self.attention_head_size = int(hidden_size / num_attention_heads)
             self.all_head_size = self.num_attention_heads * self.attention_head_size
+
             self.v_num_attention_heads = v_num_attention_heads
             self.v_attention_head_size = int(v_hidden_size / v_num_attention_heads)
             self.v_all_head_size = self.v_num_attention_heads * self.v_attention_head_size
+
             assert hidden_size == v_hidden_size, "hidden_size != v_hidden_size"
             assert num_attention_heads == v_num_attention_heads, "num_attention_heads != v_num_attention_heads"
+        else:
+            hidden_size = config.sublayer2attn_hidden_size.get(str(layer_num), config.hidden_size)
+            num_attention_heads = config.sublayer2num_attention_heads.get(str(layer_num), config.num_attention_heads)
+            v_hidden_size = config.sublayer2v_attn_hidden_size.get(str(layer_num), config.v_hidden_size)
+            v_num_attention_heads = config.sublayer2v_num_attention_heads.get(str(layer_num), config.v_num_attention_heads)
+
+            if hidden_size % num_attention_heads != 0:
+                raise ValueError(
+                    "The text hidden size (%d) is not a multiple of the number of attention "
+                    "heads (%d)" % (hidden_size, num_attention_heads)
+                )
+            self.num_attention_heads = num_attention_heads
+            self.attention_head_size = int(hidden_size / num_attention_heads)
+            self.all_head_size = self.num_attention_heads * self.attention_head_size
+
+            if v_hidden_size % v_num_attention_heads != 0:
+                raise ValueError(
+                    "The vision hidden size (%d) is not a multiple of the number of attention "
+                    "heads (%d)" % (v_hidden_size, num_attention_heads)
+                )
+            self.v_num_attention_heads = v_num_attention_heads
+            self.v_attention_head_size = int(v_hidden_size / v_num_attention_heads)
+            self.v_all_head_size = self.v_num_attention_heads * self.v_attention_head_size
+
+        self.visualization = config.visualization
 
         if self.has_text:
             self.query = nn.Linear(config.hidden_size, self.all_head_size)
@@ -372,27 +375,32 @@ class BertGatedSelfOutput(nn.Module):
     def __init__(self, config, layer_num):
         super(BertGatedSelfOutput, self).__init__()
 
-        hidden_size = config.sublayer2attn_hidden_size.get(str(layer_num), config.hidden_size)
-        v_hidden_size = config.sublayer2v_attn_hidden_size.get(str(layer_num), config.v_hidden_size)
-
         self.has_language = ((layer_num in config.tt_attn_sublayers) or (layer_num in config.tv_attn_sublayers))
         self.has_vision = ((layer_num in config.vv_attn_sublayers) or (layer_num in config.vt_attn_sublayers))
         self.share_layer = (layer_num in config.shared_sublayers)
         self.single_ln = (layer_num in config.single_ln_sublayers)
         if self.single_ln:
             assert (self.has_language and self.has_vision and self.share_layer), "Missing language, vision or sharing"
+        
+        if self.share_layer:
+            hidden_size = config.sublayer2attn_hidden_size.get(str(layer_num), config.v_hidden_size)
+            v_hidden_size = config.sublayer2v_attn_hidden_size.get(str(layer_num), config.v_hidden_size)
+        else:
+            hidden_size = config.sublayer2attn_hidden_size.get(str(layer_num), config.hidden_size)
+            v_hidden_size = config.sublayer2v_attn_hidden_size.get(str(layer_num), config.v_hidden_size)
+
 
         if self.has_language:
             self.dense = nn.Linear(hidden_size, config.hidden_size)
             self.dropout = nn.Dropout(config.hidden_dropout_prob)
-            self.LayerNorm = BertLayerNorm(config.hidden_size, eps=1e-12)
+            self.LayerNorm = BertLayerNorm(hidden_size, eps=1e-12)
         else:
             self.dense = lambda x: x
             self.dropout = lambda x: x
             self.LayerNorm = lambda x: x
 
         if self.has_language and self.has_vision and self.share_layer:
-            assert (hidden_size == v_hidden_size) and (config.hidden_size == config.v_hidden_size), "hidden_size != v_hidden_size"
+            assert (hidden_size == v_hidden_size), "hidden_size != v_hidden_size"
             self.v_dense = self.dense
             self.v_dropout = self.dropout
             self.v_LayerNorm = self.LayerNorm
@@ -466,11 +474,19 @@ class BertGatedIntermediate(nn.Module):
         self.has_vision = (layer_num in config.v_ff_sublayers)
         self.share_layer = (layer_num in config.shared_sublayers)
 
-        intermediate_size = config.sublayer2intermediate_size.get(str(layer_num), config.intermediate_size)
-        v_intermediate_size = config.sublayer2v_intermediate_size.get(str(layer_num), config.v_intermediate_size)
+        if self.share_layer:
+            hidden_size = config.v_hidden_size
+            v_hidden_size = config.v_hidden_size
+            intermediate_size = config.sublayer2intermediate_size.get(str(layer_num), config.v_intermediate_size)
+            v_intermediate_size = config.sublayer2v_intermediate_size.get(str(layer_num), config.v_intermediate_size)
+        else:
+            hidden_size = config.hidden_size
+            v_hidden_size = config.v_hidden_size
+            intermediate_size = config.sublayer2intermediate_size.get(str(layer_num), config.intermediate_size)
+            v_intermediate_size = config.sublayer2v_intermediate_size.get(str(layer_num), config.v_intermediate_size)
 
         if self.has_language:
-            self.dense = nn.Linear(config.hidden_size, intermediate_size)
+            self.dense = nn.Linear(hidden_size, intermediate_size)
             if isinstance(config.hidden_act, str):
                 self.intermediate_act_fn = ACT2FN[config.hidden_act]
             else:
@@ -479,12 +495,12 @@ class BertGatedIntermediate(nn.Module):
             self.dense = lambda x: x
             self.intermediate_act_fn = lambda x: 0
         if self.has_language and self.has_vision and self.share_layer:
-            assert config.hidden_size == config.v_hidden_size, "hidden_size != v_hidden_size"
+            assert hidden_size == v_hidden_size, "hidden_size != v_hidden_size"
             assert intermediate_size == v_intermediate_size, "intermediate_size != v_intermediate_size"
             self.v_dense = self.dense
             self.v_intermediate_act_fn = self.intermediate_act_fn
         elif self.has_vision:
-            self.v_dense = nn.Linear(config.v_hidden_size, v_intermediate_size)
+            self.v_dense = nn.Linear(v_hidden_size, v_intermediate_size)
             if isinstance(config.hidden_act, str):
                 self.v_intermediate_act_fn = ACT2FN[config.v_hidden_act]
             else:
@@ -521,28 +537,36 @@ class BertGatedOutput(nn.Module):
         if self.single_ln:
             assert (self.has_language and self.has_vision and self.share_layer), "Missing language, vision or sharing"
 
-        intermediate_size = config.sublayer2intermediate_size.get(str(layer_num), config.intermediate_size)
-        v_intermediate_size = config.sublayer2v_intermediate_size.get(str(layer_num), config.v_intermediate_size)
+        if self.share_layer:
+            hidden_size = config.v_hidden_size
+            v_hidden_size = config.v_hidden_size
+            intermediate_size = config.sublayer2intermediate_size.get(str(layer_num), config.v_intermediate_size)
+            v_intermediate_size = config.sublayer2v_intermediate_size.get(str(layer_num), config.v_intermediate_size)
+        else:
+            hidden_size = config.hidden_size
+            v_hidden_size = config.v_hidden_size
+            intermediate_size = config.sublayer2intermediate_size.get(str(layer_num), config.intermediate_size)
+            v_intermediate_size = config.sublayer2v_intermediate_size.get(str(layer_num), config.v_intermediate_size)
 
         if self.has_language:
-            self.dense = nn.Linear(intermediate_size, config.hidden_size)
+            self.dense = nn.Linear(intermediate_size, hidden_size)
             self.dropout = nn.Dropout(config.hidden_dropout_prob)
-            self.LayerNorm = BertLayerNorm(config.hidden_size, eps=1e-12)
+            self.LayerNorm = BertLayerNorm(hidden_size, eps=1e-12)
         else:
             self.dense = lambda x: x
             self.dropout = lambda x: x
             self.LayerNorm = lambda x: x
 
         if self.has_language and self.has_vision and self.share_layer:
-            assert config.hidden_size == config.v_hidden_size, "hidden_size != v_hidden_size"
+            assert hidden_size == v_hidden_size, "hidden_size != v_hidden_size"
             assert intermediate_size == v_intermediate_size, "intermediate_size != v_intermediate_size"
             self.v_dense = self.dense
             self.v_dropout = self.dropout
             self.v_LayerNorm = self.LayerNorm
         elif self.has_vision:
-            self.v_dense = nn.Linear(v_intermediate_size, config.v_hidden_size)
+            self.v_dense = nn.Linear(v_intermediate_size, v_hidden_size)
             self.v_dropout = nn.Dropout(config.v_hidden_dropout_prob)
-            self.v_LayerNorm = BertLayerNorm(config.v_hidden_size, eps=1e-12)
+            self.v_LayerNorm = BertLayerNorm(v_hidden_size, eps=1e-12)
         else:
             self.v_dense = lambda x: x
             self.v_dropout = lambda x: x
