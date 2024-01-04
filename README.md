@@ -1,3 +1,8 @@
+In the paper Beyond Image-Text Matching: Verb Understanding in Multimodal Transformers Using Guided Masking, all experiments were carried out using implemen tations of the ViLBERT, LXMERT, UNITER and VisualBERT models1 provided by VOLTA (Visiolinguistic Transformer Architectures) ([Bugliarello
+et al., 2021, EMNLP 2021](https://arxiv.org/abs/2011.15124)) [[Original code](https://github.com/e-bug/cross-modal-ablation)] a PyTorch implementation of a uni-
+fied mathematical framework of currently proposed
+V&L BERTs. 
+
 # VOLTA: Visiolinguistic Transformer Architectures
 
 This is the implementation of the framework described in the paper:
