@@ -1,9 +1,8 @@
-In the paper Beyond Image-Text Matching: Verb Understanding in Multimodal Transformers Using Guided Masking, all experiments were carried out using implemen tations of the ViLBERT, LXMERT, UNITER and VisualBERT models1 provided by VOLTA (Visiolinguistic Transformer Architectures) ([Bugliarello
-et al., 2021, EMNLP 2021](https://arxiv.org/abs/2011.15124)) [[Original code](https://github.com/e-bug/cross-modal-ablation)] a PyTorch implementation of a uni-
-fied mathematical framework of currently proposed
-V&L BERTs. 
+# Beyond Image-Text Matching: Verb Understanding in Multimodal Transformers Using Guided Masking
 
-# VOLTA: Visiolinguistic Transformer Architectures
+In the paper Beyond Image-Text Matching: Verb Understanding in Multimodal Transformers Using Guided Masking, all experiments were carried out using implemen tations of the ViLBERT, LXMERT, UNITER and VisualBERT models1 provided by VOLTA (Visiolinguistic Transformer Architectures) ([Bugliarello et al., 2021](https://arxiv.org/abs/2011.15124)) [[Original code](https://github.com/e-bug/volta)], a PyTorch implementation of a unified mathematical framework of currently proposed V&L BERTs. The following instructions are a copy from VOLTA github, on how to get the code running. We made changes tosome of the files to complete the necessary experiments, however the initial approach to start is the same.
+
+## VOLTA: Visiolinguistic Transformer Architectures
 
 This is the implementation of the framework described in the paper:
 > Emanuele Bugliarello, Ryan Cotterell, Naoaki Okazaki and Desmond Elliott. [Multimodal Pretraining Unmasked: A Meta-Analysis and a Unified Framework of Vision-and-Language BERTs](https://arxiv.org/abs/2011.15124). _Transactions of the Association for Computational Linguistics_ 2021; 9 978–994.
@@ -63,9 +62,7 @@ Model configuration files are stored in [config/](config).
 
 ## Training and Evaluation
 
-We provide sample scripts to train (i.e. pretrain or fine-tune) and evaluate models in [examples/](examples).
-These include ViLBERT, LXMERT and VL-BERT as detailed in the original papers, 
-as well as ViLBERT, LXMERT, VL-BERT, VisualBERT and UNITER as specified in our controlled study.
+We provide sample scripts to evaluate models in [examples/](examples).
 
 Task configuration files are stored in [config_tasks/](config_tasks).
 
@@ -94,6 +91,7 @@ If you find our code/data/models or ideas useful in your research, please consid
 ## Acknowledgement
 
 Our codebase heavily relies on these excellent repositories:
+- [VOLTA](https://github.com/e-bug/volta)
 - [vilbert-multi-task](https://github.com/facebookresearch/vilbert-multi-task)
 - [vilbert_beta](https://github.com/jiasenlu/vilbert_beta)
 - [lxmert](https://github.com/airsplay/lxmert)
