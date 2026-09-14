@@ -1,0 +1,142 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+from wordcloud import WordCloud
+import json
+from supar import Parser
+
+def get_index_positions(list_of_elems, element):
+    ''' Returns the indexes of all occurrences of give element in
+    the list- listOfElements '''
+    list_verbs = []
+    index_pos = 0
+    while True:
+        try:
+            # Search for item in list from indexPos to the end of list
+            index_pos = list_of_elems.index(element, index_pos)
+            if list_of_elems[(index_pos+1)] == '(_':
+                # Add the index position in list
+                list_verbs.append(list_of_elems[(index_pos+2)][:-1])
+                index_pos += 1
+            else:
+                index_pos += 1
+            if index_pos == len(list_of_elems):
+                break
+        except ValueError as e:
+            break
+    return list_verbs
+
+positive_pair_good_classification = [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 42, 44, 46, 48, 50, 52, 54, 56, 60, 62, 64, 66, 68, 70, 78, 80, 82, 84, 86, 88, 90, 92, 94, 96, 98, 100, 102, 106, 108, 110, 112, 54, 115, 117, 119, 120, 122, 124, 126, 128]
+
+positive_pair_bad_classification = [58, 74, 104]
+
+negative_pair_good_classification = [[1,9,11,23,25,37,39,41,57,59,65,75,87,105,107,109,118]
+
+negative_pair_bad_classification = [3,5,7,13,15,17,19,27,29,31,33,35,43,45,47,49,51,53,55,61,63,67,69,71,79,81,83,85,89,91,93,95,97,99,101,103,111,113,114,116,47,121,123,125,127,129,131,132,136,138,140,144,100,147,149,153,163,165,167,171,173,175,179,183,187,191,193,195,201,71,206,208,210,226,228,233,235,238,245,38,247,249,255,259,263,271,273,163,282,38,287,184,292,298,302,133,307,314,318,320,322,324,332,334,336,342,225,351,140,271,357,359,363,319,373,377,392,394,396,398,402,406,410,367,412,416,418,420,91,429,435,441,443,446,448,450,451,323,458,460,464,468,470,226,482,484,488,494,497,499,501,503,506,143,510,512,408,521,523,528,530,532,534,536,135,165,543,411,546,556,558,560,562,564,150,302,569,577,578,584,586,302,142,602,604,520,607,610,614,620,454,145,634,636,639,499,641,646,648,653,655,661,663,646,666,668,670,671,673,678,680,682,685,690,694,698,700,708,712,714,689,128,724,728,592,734,636,272,738,740,744,129,753,755,756,673,759,227,761,763,765,776,780,791,798,804,806,808,451,813,818,821,823,824,547,829,836,838,583,853,609,672,865,866,188,880,153,887,25,895,314,900,902,904,810,910,913,915,632,920,922,927,343,947,627,952,955,957,661,959,961,964,969,971,853,975,829,989,997,1004,300,1011,1013,1017,1018,1020,1026,1028,1034,837,1043,244,1048,891,1059,1061,1064,1068,1078,1079,627,768,1091,1094,993,1102,1104,1105,218,1108,849,1111,1112,1114,744,1116,1118,1121,1125,479,1128,880,1131,1132,1136,1138,242,1147,1151,1152,1154,503,1156,1157,1159,1164,1110,1168,138,1174,1108,1180,1182,667,846,1187,184,1192,1193,1194,1196,1199,35,111,1211,1213,1215,1219,1230,1232,1235,428,1238,1241,1244,192,1249,1251,1257,1259,1260,1263,1265,121,1267,324,1269,1273,646,1275,1277,1155,1282,951,1289,1293,1295,873,1298,1300,1302,515,817,1211,1321,1328,1330,1332,494,1335,1327,1202,851,1338,1343,863,115,1356,1360,645,676,1367,1369,1371,1038,1248,1379,1381,1384,683,1390,1392,392,1395,1397,1297,1400,776,188,1403,1405,1408,1414,1417,1419,1422,532,1355,1425,997,645,7,1431,1433,1434,574,1436,482,1438,880,1441,1443,1199,1447,533,1370,1451,1461,1462,1367,1466,1470,1472,1478,1479,1481,656,1488,1490,1491,1497,650,1501,1506,1508,1510,1511,1513]
+
+f = open('datasets/SVO-Probes/SVO_captions.json')
+captions = json.load(f)
+
+text = " ".join(captions[number] for number in positive_pair_good_classification)
+word_cloud = WordCloud(collocations = False, background_color = 'white').generate(text)
+
+plt.imshow(wordcloud, interpolation='bilinear')
+plt.axis("off")
+plt.show()
+plt.savefig('positive_pair_good_classification.png')
+
+text = " ".join(captions[number] for number in positive_pair_bad_classification)
+word_cloud = WordCloud(collocations = False, background_color = 'white').generate(text)
+
+plt.imshow(wordcloud, interpolation='bilinear')
+plt.axis("off")
+plt.show()
+plt.savefig('positive_pair_bad_classification.png')
+
+text = " ".join(captions[number] for number in negative_pair_good_classification)
+word_cloud = WordCloud(collocations = False, background_color = 'white').generate(text)
+
+plt.imshow(wordcloud, interpolation='bilinear')
+plt.axis("off")
+plt.show()
+plt.savefig('negative_pair_good_classification.png')
+
+text = " ".join(captions[number] for number in negative_pair_bad_classification)
+word_cloud = WordCloud(collocations = False, background_color = 'white').generate(text)
+
+plt.imshow(wordcloud, interpolation='bilinear')
+plt.axis("off")
+plt.show()
+plt.savefig('negative_pair_bad_classification.png')
+
+print('Parsing tree')
+verbs_positive_pair_good_classification= []
+parser = Parser.load('crf-con-en')
+for i in positive_pair_good_classification:
+    caption = captions[i]
+    dataset = parser.predict(description, verbose=False)
+    list_verbs = get_index_positions(str(dataset[0]).split(), '(VP')
+    sys.stdout.write("%d/%d\r" % (i, len(positive_pair_good_classification)))
+    sys.stdout.flush()
+    verbs_positive_pair_good_classification += list_verbs
+
+text = " ".join(verbs_positive_pair_good_classification)
+word_cloud = WordCloud(collocations = False, background_color = 'white').generate(text)
+
+plt.imshow(wordcloud, interpolation='bilinear')
+plt.axis("off")
+plt.show()
+plt.savefig('positive_pair_good_classification_verbs.png')
+
+print('Parsing tree')
+verbs_positive_pair_bad_classification= []
+for i in positive_pair_bad_classification:
+    caption = captions[i]
+    dataset = parser.predict(caption, verbose=False)
+    list_verbs = get_index_positions(str(dataset[0]).split(), '(VP')
+    sys.stdout.write("%d/%d\r" % (i, len(positive_pair_bad_classification)))
+    sys.stdout.flush()
+    verbs_positive_pair_bad_classification += list_verbs
+
+text = " ".join(verbs_positive_pair_bad_classification)
+word_cloud = WordCloud(collocations = False, background_color = 'white').generate(text)
+
+plt.imshow(wordcloud, interpolation='bilinear')
+plt.axis("off")
+plt.show()
+plt.savefig('positive_pair_bad_classification_verbs.png')
+
+print('Parsing tree')
+verbs_negative_pair_good_classification= []
+for i in negative_pair_good_classification:
+    caption = captions[i]
+    dataset = parser.predict(caption, verbose=False)
+    list_verbs = get_index_positions(str(dataset[0]).split(), '(VP')
+    sys.stdout.write("%d/%d\r" % (i, len(negative_pair_good_classification)))
+    sys.stdout.flush()
+    verbs_negative_pair_good_classification += list_verbs
+
+text = " ".join(verbs_negative_pair_good_classification)
+word_cloud = WordCloud(collocations = False, background_color = 'white').generate(text)
+
+plt.imshow(wordcloud, interpolation='bilinear')
+plt.axis("off")
+plt.show()
+plt.savefig('negative_pair_good_classification_verbs.png')
+
+print('Parsing tree')
+verbs_negative_pair_bad_classification= []
+for i in negative_pair_bad_classification:
+    caption = captions[i]
+    dataset = parser.predict(caption, verbose=False)
+    list_verbs = get_index_positions(str(dataset[0]).split(), '(VP')
+    sys.stdout.write("%d/%d\r" % (i, len(negative_pair_good_classification)))
+    sys.stdout.flush()
+    verbs_negative_pair_bad_classification += list_verbs
+
+text = " ".join(verbs_negative_pair_bad_classification)
+word_cloud = WordCloud(collocations = False, background_color = 'white').generate(text)
+
+plt.imshow(wordcloud, interpolation='bilinear')
+plt.axis("off")
+plt.show()
+plt.savefig('negative_pair_bad_classification_verbs.png')

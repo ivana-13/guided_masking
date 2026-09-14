@@ -1,0 +1,9 @@
+# too large for GitHub or re-downloadable: feature databases, checkpoints, caches, installers
+datasets/
+cache/
+*.bin
+*.pth
+*.lmdb/
+Anaconda3-*.sh
+__pycache__/
+*.pyc

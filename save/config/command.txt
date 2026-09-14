@@ -1,0 +1,61 @@
+Namespace(adam_epsilon=1e-08, baseline=False, bert_model='bert-base-uncased', config_file='vilbert-multi-task-main/config/bert_base_6layer_6conect.json', distributed=False, do_lower_case=True, dynamic_attention=False, file_path='datasets/mscoco/imgfeats/volta/', fp16=False, freeze=-1, from_pretrained='bert-base-uncased', gradient_accumulation_steps=1, img_weight=1, learning_rate=0.0001, local_rank=-1, loss_scale=0, max_seq_length=36, no_cuda=False, num_negative=255, num_train_epochs=10.0, num_workers=25, objective=1, on_memory=False, output_dir='save', resume_file='', save_name='', seed=42, start_epoch=0, train_batch_size=512, visual_target=0, warmup_proportion=0.1, without_coattention=False)
+
+
+{
+  "attention_probs_dropout_prob": 0.1,
+  "bi_attention_type": 1,
+  "bi_hidden_size": 1024,
+  "bi_intermediate_size": 1024,
+  "bi_num_attention_heads": 8,
+  "dynamic_attention": false,
+  "fast_mode": false,
+  "fixed_t_layer": 0,
+  "fixed_v_layer": 0,
+  "fusion_method": "mul",
+  "hidden_act": "gelu",
+  "hidden_dropout_prob": 0.1,
+  "hidden_size": 768,
+  "in_batch_pairs": false,
+  "initializer_range": 0.02,
+  "intermediate_size": 3072,
+  "max_position_embeddings": 512,
+  "model": "bert",
+  "num_attention_heads": 12,
+  "num_hidden_layers": 12,
+  "num_negative": 128,
+  "objective": 0,
+  "pooling_method": "mul",
+  "t_biattention_id": [
+    6,
+    7,
+    8,
+    9,
+    10,
+    11
+  ],
+  "task_specific_tokens": false,
+  "type_vocab_size": 2,
+  "v_attention_probs_dropout_prob": 0.1,
+  "v_biattention_id": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "v_feature_size": 2048,
+  "v_hidden_act": "gelu",
+  "v_hidden_dropout_prob": 0.1,
+  "v_hidden_size": 1024,
+  "v_initializer_range": 0.02,
+  "v_intermediate_size": 1024,
+  "v_num_attention_heads": 8,
+  "v_num_hidden_layers": 6,
+  "v_target_size": 1601,
+  "visual_target": 0,
+  "visualization": false,
+  "vocab_size": 30522,
+  "with_coattention": true
+}
+
